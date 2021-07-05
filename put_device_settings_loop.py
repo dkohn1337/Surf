@@ -14,7 +14,7 @@ token = login_data['data']['token']
 print(token)
 
 # Device Settings PUT request (use any of the API's property that you may need and can be found in the API docs)
-my_list = ['357660101302124', '357660101307124', '357660101300124']
+my_list = ['357660101356789', '357660101354321', '3576601013012345']
 lenght = len(my_list)
 print('Total devices in the list:',lenght)
 for idx,imei in enumerate(my_list):
