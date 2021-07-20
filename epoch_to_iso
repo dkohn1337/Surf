@@ -1,0 +1,16 @@
+import pandas as pd
+import datetime
+ 
+ 
+data = pd.read_csv('/Users/dor/Desktop/Surf_scripts/pythonscripts/epoch_converter.csv', header=0)
+ 
+ 
+for i in range(0,len(data)):
+    row= data.iloc[i]['Time']
+    a = int(row)
+    date = datetime.datetime.utcfromtimestamp(a)
+    targetDate = date.strftime("%Y-%m-%d %H:%M:%S")
+    print(targetDate)
+
+print('*Conversion Completed*')
+    
