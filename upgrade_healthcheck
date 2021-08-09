@@ -1,0 +1,69 @@
+import requests
+import json
+import time
+from datetime import datetime, timedelta
+from dateutil import parser
+import pytz
+
+
+# Generate Login Token
+auth_data = {"email":"dor@surfsight.net","password":"YourPassword"}
+login_api = requests.post('https://api-prod.surfsight.net/v2/authenticate',json=auth_data)
+login_data = json.loads(login_api.content.decode('utf-8'))
+token = login_data['data']['token']
+print(token)
+
+# LIST OF IMEIs
+my_list = ['357660101477669','357660101541670','357660101533727','357660101443240','357660101255503','357660101009181','357660101168888']
+
+
+
+# UPGRADE
+# lenght = len(my_list)
+# print('Total devices in the list:',lenght)
+# headers1 = {"content-type": "application/json", "Authorization": token}
+headers2 = {"content-type": "application/json", "Authorization": "Bearer " + token}
+# for idx,imei in enumerate(my_list):
+#     try:
+#         time.sleep(0.1)
+#         upgrade_api = requests.post('https://api-prod.surfsight.net/devicemanager_api/api/v1.1/devices/bulk-message-per-device', headers=headers1, json=[{"serialNumber":imei,"message":{"message_type":"upgrade","data":{"url":"https://dash-cam-upgrades.s3.us-east-2.amazonaws.com/3.9.207/inc_AI-12_3.9.104-3.9.207.zip"}}}])
+#         response_data = json.loads(upgrade_api.content.decode('utf-8'))
+#         print(imei, response_data, idx +1 , 'out of',lenght)
+#     except KeyError:
+#         print(imei + ' offline')
+#         continue
+
+
+
+# # WAIT TIME BEFORE HEALTH CHECK AFTER UPGRADES
+# time.sleep(57600) 16 hours in seconds
+
+
+
+# HEALTH CHECK - TIMES ARE IN UTC + 0 
+for imei in my_list:
+    time.sleep(0.1)
+    healthcheck_api = requests.get('https://api-prod.surfsight.net/v2/device-health/?imei=' + imei,headers=headers2)
+    healthcheck_response = json.loads(healthcheck_api.content.decode('utf-8'))
+    healthcheck_status = healthcheck_response['data'][0]['lastRecordingHealth'] # will return Red or Green or Unchecked
+    healthcheck_status_time = healthcheck_response['data'][0]['lastRecordingUpdatedAt']
+    if healthcheck_status_time == None:
+        print(imei, 'Health Check Not Tested, Awaiting for next healthcheck...')
+        continue
+    else:
+        time_string = parser.parse(healthcheck_status_time).replace(tzinfo=None)
+        difference = datetime.utcnow() - time_string
+        if difference.days >=1:
+            print(imei,"It has been MORE than 24 hours since the last health check", '-- Last Healthcheck:',difference)
+        else:
+            if healthcheck_status is True:
+                    print(imei, 'Health Check PASS!',)
+            else:
+                    print(imei, 'Health Check FAIL!')
+   
+
+
+
+
+
+
