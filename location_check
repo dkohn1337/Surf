@@ -1,0 +1,30 @@
+import requests
+import json
+import time
+from geopy.geocoders import Nominatim
+
+geolocator = Nominatim(user_agent="geoapiExercises")
+
+auth_data = {"email":"user@email.com","password":"YourPassword"}
+login_api = requests.post('https://api-prod.surfsight.net/v2/authenticate',json=auth_data)
+login_data = json.loads(login_api.content.decode('utf-8'))
+token = login_data['data']['token']
+print(token)
+
+my_list = ['357660101077204', '357660101092336', '357660101092195', '357660101092187', '357660101092179', '357660101092104', '357660101091882',]
+
+headers2 = {"content-type": "application/json", "Authorization": "Bearer " + token}
+lenght = len(my_list)
+for idx,imei in enumerate(my_list):
+    try:
+        time.sleep(0.1)
+        geolocation_api = requests.get('https://api-prod.surfsight.net/v2/devices/'+imei+'/trips?start=2021-07-26T21:00:00.000Z&end=2021-08-26T20:59:59.999Z',headers=headers2)
+        geolocation_response = json.loads(geolocation_api.content.decode('utf-8'))
+        coordinates_lat = geolocation_response['data'][0]['start']['lat']
+        coordinates_lon = geolocation_response['data'][0]['start']['lon']
+        location = geolocator.reverse([coordinates_lat,coordinates_lon])
+        print(imei,location.raw['address']['country']+'                            ',idx+1, 'out of', lenght)
+    except IndexError:
+        print(imei + ' No GPS data from the past 30 days        ',idx+1, 'out of', lenght)
+    except KeyError:
+        print(imei + ' No GPS data from the past 30 days        ',idx+1, 'out of', lenght)
