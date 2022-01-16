@@ -1,13 +1,10 @@
 import requests 
 import json 
-import time
 import pendulum
 from surftoken import token
-import math
 
 # Change IMEI
 my_list = ['357660101035475','357660101535086','357660101178143']
-
 
 for imei in my_list:
     cam1_list=[]
@@ -30,7 +27,6 @@ for imei in my_list:
         zip_object = zip(cam1_list, cam2_list)
         for cam1_list_i, cam2_list_i in zip_object:
             difference.append(cam1_list_i-cam2_list_i)
-
         if all(i <=10 and i >=-10 for i in difference):
             print('Pass', imei)
         else:
