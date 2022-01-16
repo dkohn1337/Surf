@@ -1,0 +1,42 @@
+import requests 
+import json 
+import time
+import pendulum
+from surftoken import token
+import math
+
+# Change IMEI
+my_list = ['357660101035475','357660101535086']
+
+
+for imei in my_list:
+    cam1_list=[]
+    cam2_list=[]
+    try:
+        recording_availibility_api = requests.get('https://api-prod.surfsight.net/v2/devices/'+imei+'/recording-ranges?start=2022-01-01T10:30:58.999Z&end=2022-01-02T11:59:59.999Z',headers={"content-type": "application/json", "Authorization":"Bearer " + token})
+        recordings_files = json.loads(recording_availibility_api.content.decode('utf-8'))
+        for camId1 in (recordings_files['data'][0]['intervals']):
+            cameraId1 = camId1.pop('end')
+            dt_camera1 = pendulum.parse(cameraId1)
+            time_camera1 = (dt_camera1.int_timestamp)
+            cam1_list.append(time_camera1)
+
+        for camId2 in (recordings_files['data'][1]['intervals']):
+            cameraId2 = camId2.pop('end')
+            dt_camera2 = pendulum.parse(cameraId2)
+            time_camera2 = (dt_camera2.int_timestamp)
+            cam2_list.append(time_camera2)
+        difference = []
+        zip_object = zip(cam1_list, cam2_list)
+        for cam1_list_i, cam2_list_i in zip_object:
+            difference.append(cam1_list_i-cam2_list_i)
+
+        if all(i <=10 and i >=-10 for i in difference):
+            print('Pass', imei)
+        else:
+            print('Fail',imei)
+        
+    except KeyError:
+        print('no recordings')
+    continue
+
