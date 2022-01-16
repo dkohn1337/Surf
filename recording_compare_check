@@ -6,7 +6,7 @@ from surftoken import token
 import math
 
 # Change IMEI
-my_list = ['357660101035475','357660101535086']
+my_list = ['357660101035475','357660101535086','357660101178143']
 
 
 for imei in my_list:
@@ -34,9 +34,9 @@ for imei in my_list:
         if all(i <=10 and i >=-10 for i in difference):
             print('Pass', imei)
         else:
-            print('Fail',imei)
-        
+            print('Fail',imei)  
     except KeyError:
         print('no recordings')
+    except IndexError:
+        print('Offline or No Recordings', imei)
     continue
-
